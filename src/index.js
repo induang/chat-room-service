@@ -4,6 +4,7 @@ const express = require('express');
 
 const connectDB = require('./config/db')
 const userRouter = require('./routers/userRouter')
+const chatRouter = require('./routers/chatRouter')
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware')
 
 connectDB();
@@ -13,6 +14,7 @@ app.use(express.json())
 
 
 app.use('/api/user', userRouter)
+app.use('/api/chat', chatRouter)
 
 app.use("/", (req,res) => {
   res.send('Hello, World')
