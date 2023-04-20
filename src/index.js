@@ -1,37 +1,28 @@
-const app = require('express')();
-const sever = require('http').Server(app);
-const io = require('socket.io')(sever);
-const fs = require('fs');
+const dotenv = require('dotenv')
+dotenv.config();
+const express = require('express');
 
-const comments = JSON.parse(fs.readFileSync('./static/comments.json'));
+const connectDB = require('./config/db')
+const userRouter = require('./routers/userRouter')
+const { notFound, errorHandler } = require('./middlewares/errorMiddleware')
 
-let speed = 2;
-let messageCounter = 0;
-timerFunction = () => {
-	messageCounter = ++ messageCounter % 4000;
-	io.emit('message', comments[messageCounter]);
-}
+connectDB();
+const app = express();
 
-let timer = setInterval(() => {
-	timerFunction();
-}, 1000/speed)
+app.use(express.json())
 
-io.on('connection', socket => {
-	console.log('Hello!')
 
-	socket.on('disconnect', () => {
-		console.log('Bye~')
-	})
+app.use('/api/user', userRouter)
 
-	socket.on('change speed', function(newSpeed) {
-		speed = Math.abs(newSpeed) || 1;
-		clearInterval(timer);
-		timer = setInterval(() => {
-			timerFunction();
-		}, 1000/speed);
-	})
+app.use("/", (req,res) => {
+  res.send('Hello, World')
 })
 
-sever.listen(5000, () => {
-	console.log('Server Started.')
+app.use(notFound);
+app.use(errorHandler);
+
+
+const port = process.env.PORT || 5000; 
+app.listen(port, () => {
+  console.log('Hello, visit by http://localhost:5000')
 })
