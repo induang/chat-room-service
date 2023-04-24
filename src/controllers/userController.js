@@ -1,5 +1,16 @@
 const generateToken = require('../config/tokenGenerator');
 const User = require('../models/userModel');
+const Verify = require('../models/verifyModel')
+const NodeEmail = require('nodemailer');
+const transporter = NodeEmail.createTransport({
+	service: 'qq',
+	port: 465,
+	secureConnection: true,
+	auth: {
+		user: '1419390434@qq.com',
+		pass: "mgbqusfwjyoyhdhc",
+	}
+})
 
 const registerUser = async (req, res) => {
 	const { name, email, password, pic } = req.body;
@@ -46,6 +57,41 @@ const authUser = async(req, res) => {
 	}
 }
 
+const verifyEmail = async(req, res) => {
+	const { email } = req.body;
+	const user = await Verify.findOne({email});
+	if(user){
+		res.status(400).send("Email alreay exist.")
+	}else{
+		const foundVerify = await Verify.findOne({email})
+		let code = Math.random().toString().slice(-6);
+		if(!foundVerify){
+			await Verify.create({email, code});
+		}else{
+			const startTime = new Date(foundVerify.createAt).getTime();
+			const interval = 1000*60;
+			if(new Date().getTime() - startTime > interval){
+				await Verify.findOneAndUpdate({email},{code})
+			}else{
+				code = foundVerify.code
+			}
+		}
+
+		const html = `<div><span>验证码：</span><b>${code}</b></div>`
+		const text = "text";
+		await transporter.sendMail({
+			from: '1419390434@qq.com',
+			to: email,
+			subject: "Account Register",
+			html,
+			text,
+		})
+
+		res.status(200).send("Email sended.")
+	}
+
+}
+
 // /api/user?search
 const allUsers = async (req, res) => {
 	const keyword = req.query.search ? {
@@ -59,4 +105,4 @@ const allUsers = async (req, res) => {
 	res.send(users);
 }
 
-module.exports = { registerUser, authUser, allUsers}
+module.exports = { registerUser, authUser, allUsers, verifyEmail}
