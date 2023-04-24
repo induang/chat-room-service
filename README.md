@@ -9,3 +9,5 @@ For now, we have:
 [2] JWT as user verification;
 
 [3] SALT password for privacy protection
+
+[4] cors package for all cors request

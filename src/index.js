@@ -6,9 +6,12 @@ const connectDB = require('./config/db')
 const userRouter = require('./routers/userRouter')
 const chatRouter = require('./routers/chatRouter')
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware')
+const cors = require('cors');
 
 connectDB();
 const app = express();
+
+app.use(cors())
 
 app.use(express.json())
 

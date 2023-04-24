@@ -19,12 +19,11 @@ const registerUser = async (req, res) => {
 		});
 	
 		if(user){
-			res.status(201).json({
-				_id: user._id,
+			res.set('Authorization', generateToken(user._id)).status(201).json({
+				// _id: user._id,
 				name: user.name,
 				email: user.email,
 				pic: user.pic,
-				token: generateToken(user._id),
 			});
 		} else{
 			res.status(400);
@@ -37,11 +36,10 @@ const authUser = async(req, res) => {
 	const { email, password } = req.body;
 	const user = await User.findOne({ email });
 	if(user && (await user.matchPassword(password))){
-		res.status(201).json({
+		res.set('Authorization', generateToken(user._id)).status(201).json({
 			name: user.name,
 			email: user.email,
 			pic: user.pic,
-			token: generateToken(user._id)
 		})
 	}else {
 		res.status(403).send("Unauthenrization")
