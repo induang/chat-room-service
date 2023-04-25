@@ -6,6 +6,7 @@ const connectDB = require('./config/db')
 const userRouter = require('./routers/userRouter')
 const chatRouter = require('./routers/chatRouter')
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware')
+const requestLoggerMiddleware = require('./middlewares/requestLogger')
 const cors = require('cors');
 
 connectDB();
@@ -15,6 +16,7 @@ app.use(cors())
 
 app.use(express.json())
 
+app.use(requestLoggerMiddleware);
 
 app.use('/api/user', userRouter)
 app.use('/api/chat', chatRouter)
