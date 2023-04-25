@@ -7,38 +7,51 @@ const transporter = NodeEmail.createTransport({
 	port: 465,
 	secureConnection: true,
 	auth: {
-		user: '1419390434@qq.com',
-		pass: "mgbqusfwjyoyhdhc",
+		user: process.env.MAILER_USER,
+		pass: process.env.MAILER_PASS,
 	}
 })
 
 const registerUser = async (req, res) => {
-	const { name, email, password, pic } = req.body;
+	const { name, code, email, password, pic } = req.body;
 	if(!name || !email || !password){
 		res.status(400);
 		throw new Error("Please Enter all the Fields");
 	}
 
 	const userExists = await User.findOne({email});
+	const foundVerify = Verify.findOne({email});
 
 	if(userExists){
-		res.status(400).send("User already exists");
+		res.status(400).send({message: "User already exists."});
 		// throw new Error("User already exists");
-	}else{
-		const user = await User.create({
-			name,email,password,pic
-		});
-	
-		if(user){
-			res.set('Authorization', generateToken(user._id)).status(201).json({
-				// _id: user._id,
-				name: user.name,
-				email: user.email,
-				pic: user.pic,
+	}else if (!foundVerify){
+		res.status(400).send({message: "Please send email to verify"})
+	}
+	else{
+		const expiredTime = 5*60*1000;
+		const updatedTime = new Date(foundVerify.updatedAt).getTime();
+		if(new Date().getTime() - updatedTime > expiredTime){
+			res.status(400).send({message: "The Verify Code Expired."})
+		}else if(foundVerify !== code){
+			res.status(400).send({message: "Wrong Verify Code."})
+		}
+		else {
+			const user = await User.create({
+				name,email,password,pic
 			});
-		} else{
-			res.status(400);
-			throw new Error("Failed to Create the User")
+		
+			if(user){
+				res.set('Authorization', generateToken(user._id)).status(201).json({
+					// _id: user._id,
+					name: user.name,
+					email: user.email,
+					pic: user.pic,
+				});
+			} else{
+				res.status(400);
+				throw new Error("Failed to Create the User")
+			}
 		}
 	}
 }
@@ -59,6 +72,10 @@ const authUser = async(req, res) => {
 
 const verifyEmail = async(req, res) => {
 	const { email } = req.body;
+	if(!email){
+		res.status(400).send({massage: "Please fill the email"});
+		throw new Error("Email dosent fill.")
+	}
 	const user = await Verify.findOne({email});
 	if(user){
 		res.status(400).send("Email alreay exist.")
