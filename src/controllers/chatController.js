@@ -1,5 +1,6 @@
 const Chat = require('../models/chatModel')
 const User = require("../models/userModel")
+const logger = require('../loggers/devLogger');
 
 const accessChat = async (req, res) => {
 	const {userId} = req.body;
@@ -57,6 +58,7 @@ const fetchChats = async (req, res) => {
 }
 
 const createGroupChat = async(req, res) => {
+	console.log(req.body)
 	if(!req.body.users || !req.body.name){
 		return res.status(400).send("Please fill all the fields")
 	}

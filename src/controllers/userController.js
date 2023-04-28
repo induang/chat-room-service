@@ -76,6 +76,7 @@ const authUser = async(req, res) => {
 	if(user && (await user.matchPassword(password))){
 		res.set('Access-Control-Expose-Headers', 'Authorization')
 		.set('Authorization', generateToken(user._id)).status(201).json({
+			_id: user._id,
 			name: user.name,
 			email: user.email,
 			pic: user.pic,
