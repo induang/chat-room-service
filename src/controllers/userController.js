@@ -82,7 +82,7 @@ const authUser = async(req, res) => {
 			pic: user.pic,
 		})
 	}else {
-		res.status(403).send("Unauthenrization")
+		res.status(403).send({message: "Unauthenrization. Check the account or password"})
 	}
 }
 
@@ -143,4 +143,23 @@ const allUsers = async (req, res) => {
 	res.send(users);
 }
 
-module.exports = { registerUser, authUser, allUsers, verifyEmail}
+const fakeRegister = async (req,res) => {
+	const { name, email, password, pic} = req.body;
+	const user = await User.create({
+		name,email,password,pic
+	});
+
+	if(user){
+		res.set('Authorization', generateToken(user._id)).status(201).json({
+			// _id: user._id,
+			name: user.name,
+			email: user.email,
+			pic: user.pic,
+		});
+	} else{
+		res.status(400).send({message: "Failed to create the user."});
+		throw new Error("Failed to Create the User")
+	}
+}
+
+module.exports = { registerUser, authUser, allUsers, verifyEmail, fakeRegister}

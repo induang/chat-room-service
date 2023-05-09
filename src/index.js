@@ -9,6 +9,7 @@ const messageRouter = require('./routers/messageRouter')
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware')
 const requestLoggerMiddleware = require('./middlewares/requestLogger')
 const cors = require('cors');
+const logger = require('./loggers/devLogger');
 
 connectDB();
 const app = express();
@@ -46,10 +47,13 @@ const io = require('socket.io')(server, {
 io.on('connection', (socket) => {
   console.log('connected to socket.io');
 
+  socket.on('disconnect', (reason) => {
+    console.log('disconnect: ', reason)
+  })
+  
   socket.on('setup', (userData) => {
     socket.join(userData._id);
-    console.log(userData._id)
-    socket.emit('connected.')
+    socket.emit('connected')
   });
 
   socket.on('join chat', (room) => {
@@ -57,14 +61,27 @@ io.on('connection', (socket) => {
     console.log("User Joined Room: " + room)
   })
 
+  socket.on("leave chat", (room) => {
+    socket.leave(room);
+    console.log("User leave Room: " + room)
+  })
+
   socket.on('new message', (newMessageReceived) => {
+    console.log('message boardcast run.')
     let chat = newMessageReceived.chat;
 
     if(!chat.users) return console.log('Chat.user not defined');
-    
+    if(!chat._id) return console.log('Chat._id not defined')
     chat.users.forEach(user => {
-      if(user._id == newMessageReceived.sender._id) return;
+      if(user._id === newMessageReceived.sender._id) return;
       socket.in(user._id).emit("message received", newMessageReceived)
     })
+    // socket.in(chat._id).emit('message received', newMessageReceived)
+  })
+  
+
+  socket.off('setup', () => {
+    console.log('USER DISCONNECTED');
+    socket.leave(userData._id)
   })
 })

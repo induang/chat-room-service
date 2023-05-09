@@ -6,13 +6,13 @@ const accessChat = async (req, res) => {
 	const {userId} = req.body;
 
 	if(!userId){
-		console.log("userId params not sent with request")
-		return res.sendStatus(400);
+		res.status(400).send({message: "userId params not sent with request"})
+		throw new Error("userId params not sent with request");
 	}
 	let isChat = await Chat.find({
 		isGroupChat: false,
 		$and: [
-			{users: {$elemMatch: { $eq: req.user._Id}}},
+			{users: {$elemMatch: { $eq: req.user._id}}},
 			{users: {$elemMatch: { $eq: userId}}}
 		]
 	}).populate("users", "-password").populate("latestMessage");
