@@ -14,17 +14,17 @@ const userSchema = mongoose.Schema({
 	timestamps: true
 });
 
-userSchema.methods.matchPassword = async function (enterPassword){
-	return await bcrypt.compare(enterPassword, this.password);
+userSchema.methods.matchPassword = async function (password){
+	return bcrypt.compareSync(process.env.PASS_SALT_KEY, password);
 }
 
-userSchema.pre('save', async function (next){
-	if(!this.isModified){
-		next()
-	}
-	const salt = await bcrypt.genSalt(10);
-	this.password = await bcrypt.hash(this.password, salt);
-})
+// userSchema.pre('save', async function (next){
+// 	if(!this.isModified){
+// 		next()
+// 	}
+// 	const salt = await bcrypt.genSalt(10);
+// 	this.password = await bcrypt.hash(this.password, salt);
+// })
 
 const User = mongoose.model("User", userSchema);
 

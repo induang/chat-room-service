@@ -73,7 +73,7 @@ const registerUser = async (req, res) => {
 const authUser = async(req, res) => {
 	const { email, password } = req.body;
 	const user = await User.findOne({ email });
-	if(user && (await user.matchPassword(password))){
+	if(user && user.matchPassword(password)){
 		res.set('Access-Control-Expose-Headers', 'Authorization')
 		.set('Authorization', generateToken(user._id)).status(201).json({
 			_id: user._id,
