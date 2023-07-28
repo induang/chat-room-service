@@ -1,5 +1,7 @@
 # chat-room-service
 
+部署在glitch上, 免费账户, 只能先激活项目, 服务才能在网络上被访问到;
+
 This is a sevice for chat room;
 see the chat room: https://github.com/induang/chat-room
 
