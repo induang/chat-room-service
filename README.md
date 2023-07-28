@@ -1,7 +1,7 @@
 # chat-room-service
 
 This is a sevice for chat room;
-
+see the chat room: https://github.com/induang/chat-room
 For now, we have:
 
 [1] Mongo DB as database with ODM mongoose;
@@ -15,7 +15,3 @@ For now, we have:
 [5] winston to log request in terminal
 
 [6] socket io for real-time chat
-
-[todo] command js 不能导出函数作为中间件?
-
-[todo] 可以直接throw
